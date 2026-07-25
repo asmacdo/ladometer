@@ -42,25 +42,32 @@ from .specs import FixtureSpec
 class Shape:
     """The parameters of a generated dataset hierarchy.
 
-    Modelled on the shape that actually hurts: a superdataset of studies, each
-    with derivative subdatasets, each pointing at a raw-data subdataset holding
-    the bulk of the files. That nesting -- not raw file count alone -- is what
-    makes a recursive dirty check expensive.
+    Deliberately a *generic tree* rather than a BIDS-shaped one. The suite's
+    first job is to find out what actually drives cost -- dataset count, file
+    count, nesting depth, file size, annex-vs-git -- and that requires varying
+    one axis while holding the others fixed. A domain-shaped spec bakes several
+    axes together and cannot answer the question.
+
+    A realistic BIDS-like hierarchy is expressible as a tree; the reverse is
+    not true, so this loses nothing.
     """
 
-    #: Number of study subdatasets under the superdataset.
-    studies: int = 2
-    #: Derivative subdatasets per study.
-    derivatives_per_study: int = 2
-    #: Files in each derivative dataset.
-    files_per_derivative: int = 20
-    #: Files in the shared raw dataset under each derivative. This is the fat
-    #: one -- in the real workload it is tens of thousands.
-    files_per_raw: int = 200
-    #: Annex the bulk files (locked symlinks) rather than committing to git.
-    #: Locked annex files are the common case and make dirty-checking cheap per
-    #: file; flipping this is how you would measure the unlocked penalty.
+    #: Levels of subdatasets below the root. depth=0 is a single dataset.
+    depth: int = 2
+    #: Child subdatasets per dataset.
+    breadth: int = 2
+    #: Files committed in every dataset in the tree.
+    files_per_dataset: int = 100
+    #: Bytes per file. Separates "many files" from "much data" as cost drivers.
+    file_size_bytes: int = 64
+    #: Annex the files (locked symlinks) rather than committing them to git.
     annex: bool = True
+
+    def n_datasets(self) -> int:
+        return sum(self.breadth**i for i in range(self.depth + 1))
+
+    def n_files(self) -> int:
+        return self.n_datasets() * self.files_per_dataset
 
     def digest(self) -> str:
         blob = json.dumps(asdict(self), sort_keys=True).encode()
@@ -88,25 +95,44 @@ def _git_env() -> dict:
     return env
 
 
-def _populate(ds: Path, n: int, annex: bool, env: dict, tag: str) -> None:
-    """Create ``n`` small files and commit them.
+def _populate(ds: Path, shape: Shape, env: dict, tag: str) -> None:
+    """Create ``shape.files_per_dataset`` files and commit them.
 
     Files are written directly and added with git/git-annex rather than through
     datalad: the datalad call overhead per file would dominate build time, and
     the resulting repository is identical.
     """
+    n = shape.files_per_dataset
     if n <= 0:
         return
     data = ds / "data"
     data.mkdir(exist_ok=True)
     for i in range(n):
-        # Unique content per file so annex keys differ, as they would in reality.
-        (data / f"{tag}_{i:06d}.dat").write_text(f"{tag}-{i}\n")
-    if annex:
-        _run(["git", "annex", "add", "data"], cwd=ds, env=env)
+        # Unique content per file so annex keys differ, as they would in
+        # reality -- identical content would collapse to one key and make the
+        # fixture unrepresentatively cheap.
+        head = f"{tag}-{i}\n".encode()
+        pad = max(0, shape.file_size_bytes - len(head))
+        (data / f"{tag}_{i:06d}.dat").write_bytes(head + b"\0" * pad)
+    if shape.annex:
+        _run(["git", "annex", "add", "--quiet", "data"], cwd=ds, env=env)
     else:
         _run(["git", "add", "data"], cwd=ds, env=env)
-    _run(["git", "commit", "-q", "-m", f"add {n} {tag} files"], cwd=ds, env=env)
+    _run(["git", "commit", "-q", "-m", f"add {n} files"], cwd=ds, env=env)
+
+
+def _build_subtree(
+    parent: Path, level: int, shape: Shape, env: dict, datalad: str
+) -> None:
+    """Recursively create ``breadth`` children under ``parent``."""
+    if level > shape.depth:
+        return
+    for b in range(shape.breadth):
+        child_rel = f"sub-{level:02d}-{b:03d}"
+        child = parent / child_rel
+        _run([datalad, "create", "-d", str(parent), str(child)], cwd=parent, env=env)
+        _populate(child, shape, env, f"l{level}b{b}")
+        _build_subtree(child, level + 1, shape, env, datalad)
 
 
 def build(shape: Shape, dest: Path, datalad: str = "datalad") -> Path:
@@ -114,36 +140,9 @@ def build(shape: Shape, dest: Path, datalad: str = "datalad") -> Path:
     env = _git_env()
     dest.parent.mkdir(parents=True, exist_ok=True)
 
-    _run([datalad, "-f", "json", "create", str(dest)], cwd=dest.parent, env=env)
-
-    for s in range(shape.studies):
-        study_rel = f"studies/study-{s:03d}"
-        _run(
-            [datalad, "create", "-d", str(dest), str(dest / study_rel)],
-            cwd=dest,
-            env=env,
-        )
-        study = dest / study_rel
-
-        for d in range(shape.derivatives_per_study):
-            deriv_rel = f"derivatives/deriv-{d:03d}"
-            _run(
-                [datalad, "create", "-d", str(study), str(study / deriv_rel)],
-                cwd=study,
-                env=env,
-            )
-            deriv = study / deriv_rel
-            _populate(deriv, shape.files_per_derivative, shape.annex, env, "deriv")
-
-            # The fat leaf: each derivative carries its own raw subdataset,
-            # mirroring how derivative datasets reference their inputs.
-            raw_rel = "sourcedata/raw"
-            _run(
-                [datalad, "create", "-d", str(deriv), str(deriv / raw_rel)],
-                cwd=deriv,
-                env=env,
-            )
-            _populate(deriv / raw_rel, shape.files_per_raw, shape.annex, env, "raw")
+    _run([datalad, "create", str(dest)], cwd=dest.parent, env=env)
+    _populate(dest, shape, env, "root")
+    _build_subtree(dest, 1, shape, env, datalad)
 
     # One recursive save to record every subdataset pointer up the chain.
     _run([datalad, "save", "-r", "-m", "build fixture"], cwd=dest, env=env)

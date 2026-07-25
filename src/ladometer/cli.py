@@ -84,15 +84,64 @@ def cmd_run(args) -> int:
                     )
                     ok = rec.validity.get("ok")
                     wall = rec.measurement.wall_clock_sec
-                    flag = "ok " if ok else "FAIL"
+                    flag = "ok  " if ok else "FAIL"
+                    timing = f"{wall:8.2f}s" if wall is not None else "       --"
                     print(
-                        f"{flag} {sc:22s} {fx:18s} {ev:18s} rep{rep}  "
-                        f"{wall:8.2f}s" if wall is not None else f"{flag} {sc} (no timing)",
+                        f"{flag} {sc:16s} {fx:16s} {ev:14s} rep{rep} {timing}",
                         flush=True,
                     )
                     failures += 0 if ok else 1
     print(f"\nrecords in {roots['out_root']}")
     return 1 if failures else 0
+
+
+def cmd_report(args) -> int:
+    """Summarise recorded runs.
+
+    Reads records only -- never re-runs anything -- so a report is cheap and
+    reproducible. Metrics are printed alongside their reliability rating rather
+    than silently, so a reader knows which columns to lean on.
+    """
+    out_root = _roots(args)["out_root"]
+    records = []
+    for path in sorted(out_root.glob("*/record.json")):
+        try:
+            records.append(json.loads(path.read_text()))
+        except Exception:
+            continue
+    if not records:
+        print(f"no records under {out_root}")
+        return 1
+
+    rel = records[-1].get("metric_reliability", {})
+    print(f"{len(records)} records in {out_root}")
+    print(f"metric reliability: {rel}\n")
+
+    rows = {}
+    for r in records:
+        key = (r["scenario"]["name"], r["fixture"]["name"], r["environment"]["name"])
+        wall = r["measurement"].get("wall_clock_sec")
+        if wall is not None:
+            rows.setdefault(key, []).append(wall)
+
+    hdr = f"{'scenario':16s} {'fixture':16s} {'environment':14s} {'n':>2s} {'wall_med':>9s} {'files':>8s} {'repos':>6s}"
+    print(hdr)
+    print("-" * len(hdr))
+    stats = {
+        (r["scenario"]["name"], r["fixture"]["name"], r["environment"]["name"]): (
+            r["fixture"].get("stats") or {}
+        )
+        for r in records
+    }
+    for key in sorted(rows):
+        walls = sorted(rows[key])
+        med = walls[len(walls) // 2]
+        st = stats.get(key, {})
+        print(
+            f"{key[0]:16s} {key[1]:16s} {key[2]:14s} {len(walls):2d} "
+            f"{med:9.2f} {st.get('tracked_files', '?'):>8} {st.get('repos', '?'):>6}"
+        )
+    return 0
 
 
 def main(argv=None) -> int:
@@ -121,6 +170,10 @@ def main(argv=None) -> int:
     p.add_argument("--reps", type=int)
     p.add_argument("--warmup", action="store_true")
     p.set_defaults(func=cmd_run)
+
+    p = sub.add_parser("report", help="summarise recorded runs")
+    _add_common(p)
+    p.set_defaults(func=cmd_report)
 
     args = ap.parse_args(argv)
     return args.func(args)

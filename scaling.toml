@@ -1,0 +1,107 @@
+# Scaling experiment: what actually drives the cost of a recursive dirty check?
+#
+# Candidate drivers: number of datasets, number of files, nesting depth, file
+# size, annex-vs-git. Each group below varies ONE of those while holding the
+# rest fixed, so the answer is attributable rather than inferred.
+#
+# Run with:
+#   ladometer run --config scaling.toml --scenarios status-full status-commit --reps 1
+
+reps = 1
+
+# --- A: file count, dataset count fixed at 7 (depth 2, breadth 2) -----------
+[fixture.a-files-100]
+[fixture.a-files-100.shape]
+depth = 2
+breadth = 2
+files_per_dataset = 100
+
+[fixture.a-files-400]
+[fixture.a-files-400.shape]
+depth = 2
+breadth = 2
+files_per_dataset = 400
+
+[fixture.a-files-1600]
+[fixture.a-files-1600.shape]
+depth = 2
+breadth = 2
+files_per_dataset = 1600
+
+[fixture.a-files-6400]
+[fixture.a-files-6400.shape]
+depth = 2
+breadth = 2
+files_per_dataset = 6400
+
+# --- B: dataset count, depth fixed at 1, files fixed at 100 -----------------
+[fixture.b-ds-3]
+[fixture.b-ds-3.shape]
+depth = 1
+breadth = 2
+files_per_dataset = 100
+
+[fixture.b-ds-7]
+[fixture.b-ds-7.shape]
+depth = 1
+breadth = 6
+files_per_dataset = 100
+
+[fixture.b-ds-15]
+[fixture.b-ds-15.shape]
+depth = 1
+breadth = 14
+files_per_dataset = 100
+
+[fixture.b-ds-31]
+[fixture.b-ds-31.shape]
+depth = 1
+breadth = 30
+files_per_dataset = 100
+
+# --- C: nesting depth at ~constant dataset count (15) and file count --------
+# b-ds-15 above is the flat arm (depth 1, breadth 14).
+[fixture.c-deep-3x2]
+[fixture.c-deep-3x2.shape]
+depth = 3
+breadth = 2
+files_per_dataset = 100
+
+[fixture.c-chain-14]
+[fixture.c-chain-14.shape]
+depth = 14
+breadth = 1
+files_per_dataset = 100
+
+# --- D: file size, everything else fixed ------------------------------------
+[fixture.d-bigfiles]
+[fixture.d-bigfiles.shape]
+depth = 2
+breadth = 2
+files_per_dataset = 1600
+file_size_bytes = 65536
+
+# --- E: git instead of annex, everything else fixed -------------------------
+[fixture.e-gitfiles]
+[fixture.e-gitfiles.shape]
+depth = 2
+breadth = 2
+files_per_dataset = 1600
+annex = false
+
+# --- environments -----------------------------------------------------------
+[environment.datalad-1_6_1]
+packages = ["datalad==1.6.1", "con-duct>=0.21.0"]
+
+# --- scenarios --------------------------------------------------------------
+[scenario.status-full]
+description = "Default status at the top of a clean hierarchy (-e full)."
+setup = [["{datalad}", "install", "-r", "-s", "{pristine}", "{work}"]]
+command = ["{datalad}", "status", "-e", "full"]
+mutates = false
+
+[scenario.status-commit]
+description = "Control: the cheap subdataset-state evaluation."
+setup = [["{datalad}", "install", "-r", "-s", "{pristine}", "{work}"]]
+command = ["{datalad}", "status", "-e", "commit"]
+mutates = false
