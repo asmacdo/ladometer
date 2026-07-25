@@ -89,6 +89,33 @@ breadth = 2
 files_per_dataset = 1600
 annex = false
 
+# --- F: cost per git-tracked file -------------------------------------------
+# E showed files committed to git rather than annexed are dramatically more
+# expensive for `datalad status`, while raw `git status` is unaffected. This
+# group establishes whether that cost is linear in git-file count, so the
+# per-file constant can be used to predict real datasets (which are mostly
+# annexed symlinks plus a minority of git-tracked sidecar files).
+[fixture.f-git-100]
+[fixture.f-git-100.shape]
+depth = 2
+breadth = 2
+files_per_dataset = 100
+annex = false
+
+[fixture.f-git-400]
+[fixture.f-git-400.shape]
+depth = 2
+breadth = 2
+files_per_dataset = 400
+annex = false
+
+[fixture.f-git-800]
+[fixture.f-git-800.shape]
+depth = 2
+breadth = 2
+files_per_dataset = 800
+annex = false
+
 # --- environments -----------------------------------------------------------
 [environment.datalad-1_6_1]
 packages = ["datalad==1.6.1", "con-duct>=0.21.0"]
