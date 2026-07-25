@@ -1,0 +1,19 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "ladometer"
+version = "0.0.1"
+description = "A benchmarking suite for DataLad-family implementations"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "con-duct>=0.21.0",
+]
+
+[project.scripts]
+ladometer = "ladometer.cli:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/ladometer"]

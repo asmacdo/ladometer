@@ -1,0 +1,71 @@
+# Ladometer suite definition.
+#
+# The whole matrix is declared here: fixtures (what to measure against),
+# environments (what to measure), scenarios (what to do).
+
+reps = 3
+
+# --- fixtures ---------------------------------------------------------------
+# Generated fixtures are the default: reproducible on any host, and cheap to
+# restore because each run clones from a cached pristine build.
+
+[fixture.synth-small]
+kind = "generated"
+[fixture.synth-small.shape]
+studies = 2
+derivatives_per_study = 2
+files_per_derivative = 20
+files_per_raw = 200
+annex = true
+
+# Shaped after the real workload that motivated this suite: a superdataset of
+# BIDS studies, each with derivative datasets referencing a fat raw dataset.
+[fixture.synth-bids-like]
+kind = "generated"
+[fixture.synth-bids-like.shape]
+studies = 3
+derivatives_per_study = 3
+files_per_derivative = 500
+files_per_raw = 8000
+annex = true
+
+# --- environments -----------------------------------------------------------
+
+[environment.datalad-1_6_1]
+packages = ["datalad==1.6.1", "con-duct>=0.21.0"]
+
+[environment.datalad-next]
+packages = ["datalad==1.6.1", "datalad-next==1.6.0", "con-duct>=0.21.0"]
+
+# --- scenarios --------------------------------------------------------------
+
+[scenario.clone-recursive]
+description = "Recursively install a whole hierarchy, no annexed content."
+command = ["{datalad}", "install", "-r", "-s", "{pristine}", "{work}"]
+cwd = "{work_root}"
+mutates = true
+checks = ["exit_zero", "path_exists"]
+
+[scenario.status-full]
+description = "Default status at the top of a clean hierarchy (-e full)."
+setup = [["{datalad}", "install", "-r", "-s", "{pristine}", "{work}"]]
+command = ["{datalad}", "status", "-e", "full"]
+mutates = false
+
+[scenario.status-commit]
+description = "Same, with the cheap subdataset-state evaluation."
+setup = [["{datalad}", "install", "-r", "-s", "{pristine}", "{work}"]]
+command = ["{datalad}", "status", "-e", "commit"]
+mutates = false
+
+[scenario.status-recursive]
+description = "Recursive status across the whole hierarchy."
+setup = [["{datalad}", "install", "-r", "-s", "{pristine}", "{work}"]]
+command = ["{datalad}", "status", "-r"]
+mutates = false
+
+[scenario.save-r-clean]
+description = "Recursive save on an already-clean hierarchy: pure dirty-check cost."
+setup = [["{datalad}", "install", "-r", "-s", "{pristine}", "{work}"]]
+command = ["{datalad}", "save", "-r", "-m", "ladometer"]
+mutates = true
