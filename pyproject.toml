@@ -15,5 +15,14 @@ dependencies = [
 [project.scripts]
 ladometer = "ladometer.cli:main"
 
+[dependency-groups]
+dev = ["pytest>=8"]
+
 [tool.hatch.build.targets.wheel]
 packages = ["src/ladometer"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+# Fixture builds are slow; mark those tests and skip by default.
+markers = ["slow: builds a real dataset hierarchy (minutes)"]
+addopts = "-m 'not slow'"
