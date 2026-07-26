@@ -44,6 +44,10 @@ invariants below exist to protect it.
   known-unreliable (upstream fix pending) and rated `low`.
 - Page cache dominates repeats. Say which state a number came from.
 - Report ratios, not absolutes, when comparing across machines.
+- Preserve uncertainty. A number travels with its spread and the assumptions
+  under it; "consistent with" is not "confirmed", and a point estimate without
+  its spread is not a result. The same applies to design notes: decided,
+  proposed, and assumed stay labeled as what they are.
 
 ## Conventions
 
