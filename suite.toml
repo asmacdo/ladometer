@@ -30,12 +30,16 @@ files_per_raw = 8000
 annex = true
 
 # --- environments -----------------------------------------------------------
+# git-annex is pinned in every environment (environments.py's stated intent,
+# previously unimplemented: the suite silently inherited the host's annex).
+# 10.20250630 matches the version the host provided while axes A-F ran, so the
+# pin changes only the build (wheel vs distro), never the version, of prior data.
 
 [environment.datalad-1_6_1]
-packages = ["datalad==1.6.1", "con-duct>=0.21.0"]
+packages = ["datalad==1.6.1", "git-annex==10.20250630", "con-duct>=0.21.0"]
 
 [environment.datalad-next]
-packages = ["datalad==1.6.1", "datalad-next==1.6.0", "con-duct>=0.21.0"]
+packages = ["datalad==1.6.1", "datalad-next==1.6.0", "git-annex==10.20250630", "con-duct>=0.21.0"]
 
 # --- scenarios --------------------------------------------------------------
 

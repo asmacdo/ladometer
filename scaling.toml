@@ -122,8 +122,10 @@ files_per_dataset = 800
 annex = false
 
 # --- environments -----------------------------------------------------------
+# git-annex pinned to the version the host provided during axes A-F, so the
+# pin changes only the build (wheel vs distro) relative to that data.
 [environment.datalad-1_6_1]
-packages = ["datalad==1.6.1", "con-duct>=0.21.0"]
+packages = ["datalad==1.6.1", "git-annex==10.20250630", "con-duct>=0.21.0"]
 
 # --- scenarios --------------------------------------------------------------
 [scenario.status-full]
