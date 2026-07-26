@@ -5,9 +5,14 @@
 # rest fixed, so the answer is attributable rather than inferred.
 #
 # Run with:
-#   ladometer run --config scaling.toml --scenarios status-full status-commit --reps 1
+#   ladometer run --config scaling.toml --scenarios status-full status-commit
+#
+# reps = 3 so every (scenario, fixture) point carries a spread, not a point:
+# per-rep variance is what weights the model fit and sets prediction-band
+# width. The original pass ran reps = 1; those records remain valid, just
+# spreadless.
 
-reps = 1
+reps = 3
 
 # --- A: file count, dataset count fixed at 7 (depth 2, breadth 2) -----------
 [fixture.a-files-100]
