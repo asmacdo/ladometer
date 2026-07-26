@@ -1,0 +1,26 @@
+ok   status-full      a-files-100      datalad-1_6_1  rep0     0.83s
+ok   status-commit    a-files-100      datalad-1_6_1  rep0     0.34s
+ok   status-full      a-files-400      datalad-1_6_1  rep0     0.89s
+ok   status-commit    a-files-400      datalad-1_6_1  rep0     0.36s
+ok   status-full      a-files-1600     datalad-1_6_1  rep0     1.42s
+ok   status-commit    a-files-1600     datalad-1_6_1  rep0     0.51s
+ok   status-full      a-files-6400     datalad-1_6_1  rep0     3.04s
+ok   status-commit    a-files-6400     datalad-1_6_1  rep0     0.79s
+ok   status-full      b-ds-3           datalad-1_6_1  rep0     0.58s
+ok   status-commit    b-ds-3           datalad-1_6_1  rep0     0.27s
+ok   status-full      b-ds-7           datalad-1_6_1  rep0     0.87s
+ok   status-commit    b-ds-7           datalad-1_6_1  rep0     0.34s
+ok   status-full      b-ds-15          datalad-1_6_1  rep0     1.36s
+ok   status-commit    b-ds-15          datalad-1_6_1  rep0     0.32s
+ok   status-full      b-ds-31          datalad-1_6_1  rep0     2.91s
+ok   status-commit    b-ds-31          datalad-1_6_1  rep0     0.42s
+ok   status-full      c-deep-3x2       datalad-1_6_1  rep0     1.39s
+ok   status-commit    c-deep-3x2       datalad-1_6_1  rep0     0.32s
+ok   status-full      c-chain-14       datalad-1_6_1  rep0     1.54s
+ok   status-commit    c-chain-14       datalad-1_6_1  rep0     0.34s
+ok   status-full      d-bigfiles       datalad-1_6_1  rep0     1.41s
+ok   status-commit    d-bigfiles       datalad-1_6_1  rep0     0.47s
+ok   status-full      e-gitfiles       datalad-1_6_1  rep0    28.15s
+ok   status-commit    e-gitfiles       datalad-1_6_1  rep0     6.17s
+
+records in /home/austin/.cache/ladometer-scaling/runs

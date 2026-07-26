@@ -1,0 +1,20 @@
+ok   status-full      a-files-1600     datalad-1_6_1  rep0     1.45s
+ok   status-full      a-files-1600     datalad-1_6_1  rep1     1.39s
+ok   status-full      a-files-1600     datalad-1_6_1  rep2     1.49s
+ok   status-full      e-gitfiles       datalad-1_6_1  rep0    33.30s
+ok   status-full      e-gitfiles       datalad-1_6_1  rep1    24.69s
+ok   status-full      e-gitfiles       datalad-1_6_1  rep2    36.74s
+ok   status-full      d-bigfiles       datalad-1_6_1  rep0     1.52s
+ok   status-full      d-bigfiles       datalad-1_6_1  rep1     1.72s
+ok   status-full      d-bigfiles       datalad-1_6_1  rep2     1.51s
+ok   status-full      b-ds-15          datalad-1_6_1  rep0     1.33s
+ok   status-full      b-ds-15          datalad-1_6_1  rep1     1.50s
+ok   status-full      b-ds-15          datalad-1_6_1  rep2     1.43s
+ok   status-full      c-deep-3x2       datalad-1_6_1  rep0     1.62s
+ok   status-full      c-deep-3x2       datalad-1_6_1  rep1     1.42s
+ok   status-full      c-deep-3x2       datalad-1_6_1  rep2     1.45s
+ok   status-full      c-chain-14       datalad-1_6_1  rep0     1.45s
+ok   status-full      c-chain-14       datalad-1_6_1  rep1     1.43s
+ok   status-full      c-chain-14       datalad-1_6_1  rep2     1.65s
+
+records in /home/austin/.cache/ladometer-scaling/runs

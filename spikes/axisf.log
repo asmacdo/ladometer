@@ -1,0 +1,8 @@
+ok   status-full      f-git-100        datalad-1_6_1  rep0     2.91s
+ok   status-full      f-git-100        datalad-1_6_1  rep1     3.54s
+ok   status-full      f-git-400        datalad-1_6_1  rep0     8.80s
+ok   status-full      f-git-400        datalad-1_6_1  rep1     8.45s
+ok   status-full      f-git-800        datalad-1_6_1  rep0    15.32s
+ok   status-full      f-git-800        datalad-1_6_1  rep1    16.74s
+
+records in /home/austin/.cache/ladometer-scaling/runs

@@ -3,5 +3,7 @@ __pycache__/
 *.egg-info/
 *.pyc
 *.log
+# spikes/ is the audit trail: its logs are tracked evidence, not run output
+!spikes/*.log
 runs/
 .pytest_cache/
