@@ -28,6 +28,13 @@ invariants below exist to protect it.
 6. **Records are the only interface.** Reporting and analysis read `record.json`
    and nothing else. Changing the record schema means bumping `SCHEMA`.
 
+## Goals
+
+- Accuracy: prefer kernel-truth measurement over sampling and estimation.
+- Evenness: runs being compared must experience comparable conditions, or the record must say they didn't.
+- STAMPED: self-contained, portable, reproducible execution environments.
+- Provenance: a record carries everything needed to interpret it years later, without the host it ran on.
+
 ## Measuring honestly
 
 - Vary one axis at a time. A fixture spec that bundles several axes (a
@@ -40,6 +47,7 @@ invariants below exist to protect it.
 
 ## Conventions
 
+- Go with the grain of the problem. Do not overfit to a user-ask; push back when necessary.
 - Python >= 3.11, stdlib-first. `con-duct` is the only runtime dependency; keep it
   that way unless there is a strong reason.
 - Comments explain *why*, especially where a simpler-looking approach was rejected
